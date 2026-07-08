@@ -1,0 +1,172 @@
+erDiagram
+    USERS {
+        UUID id PK
+        STRING email
+        STRING hashed_password
+        STRING full_name
+        ENUM role
+        BOOLEAN is_active
+        STRING refresh_token
+        TEXT bio
+        STRING phone
+        STRING avatar_url
+        DATETIME created_at
+        DATETIME updated_at
+        DATETIME deleted_at
+        BOOLEAN is_deleted
+    }
+
+    RECRUITERS {
+        UUID id PK
+        UUID user_id FK "USERS.id"
+        STRING company_name
+        STRING title
+        STRING department
+        ENUM status
+        DATETIME created_at
+        DATETIME updated_at
+        DATETIME deleted_at
+        BOOLEAN is_deleted
+    }
+
+    CANDIDATES {
+        UUID id PK
+        UUID user_id FK "USERS.id"
+        STRING full_name
+        STRING email
+        STRING phone
+        STRING current_title
+        STRING location
+        TEXT summary
+        INT years_experience
+        ENUM status
+        DATETIME created_at
+        DATETIME updated_at
+        DATETIME deleted_at
+        BOOLEAN is_deleted
+    }
+
+    RESUMES {
+        UUID id PK
+        UUID candidate_id FK "CANDIDATES.id"
+        STRING file_name
+        STRING storage_path
+        TEXT content_text
+        STRING parser_version
+        BOOLEAN is_primary
+        DATETIME created_at
+        DATETIME updated_at
+        DATETIME deleted_at
+        BOOLEAN is_deleted
+    }
+
+    JOBS {
+        UUID id PK
+        UUID recruiter_id FK "RECRUITERS.id"
+        STRING title
+        STRING company_name
+        STRING location
+        TEXT description
+        INT salary_min
+        INT salary_max
+        BOOLEAN remote
+        STRING employment_type
+        ENUM status
+        DATETIME created_at
+        DATETIME updated_at
+        DATETIME deleted_at
+        BOOLEAN is_deleted
+    }
+
+    SKILLS {
+        UUID id PK
+        STRING name
+        STRING category
+        DATETIME created_at
+        DATETIME updated_at
+        DATETIME deleted_at
+        BOOLEAN is_deleted
+    }
+
+    CANDIDATE_SKILLS {
+        UUID id PK
+        UUID candidate_id FK "CANDIDATES.id"
+        UUID skill_id FK "SKILLS.id"
+        INT years_experience
+        FLOAT confidence_score
+        DATETIME created_at
+        DATETIME updated_at
+        DATETIME deleted_at
+        BOOLEAN is_deleted
+    }
+
+    JOB_SKILLS {
+        UUID id PK
+        UUID job_id FK "JOBS.id"
+        UUID skill_id FK "SKILLS.id"
+        INT years_required
+        BOOLEAN is_mandatory
+        DATETIME created_at
+        DATETIME updated_at
+        DATETIME deleted_at
+        BOOLEAN is_deleted
+    }
+
+    EMBEDDINGS {
+        UUID id PK
+        UUID candidate_id FK "CANDIDATES.id"
+        UUID resume_id FK "RESUMES.id"
+        UUID job_id FK "JOBS.id"
+        ENUM embedding_type
+        STRING model_name
+        TEXT source_text
+        JSON vector
+        STRING content_hash
+        DATETIME created_at
+        DATETIME updated_at
+        DATETIME deleted_at
+        BOOLEAN is_deleted
+    }
+
+    RANKING_RESULTS {
+        UUID id PK
+        UUID job_id FK "JOBS.id"
+        UUID candidate_id FK "CANDIDATES.id"
+        FLOAT score
+        INT rank_position
+        TEXT explanation
+        DATETIME created_at
+        DATETIME updated_at
+        DATETIME deleted_at
+        BOOLEAN is_deleted
+    }
+
+    SEARCH_HISTORY {
+        UUID id PK
+        UUID user_id FK "USERS.id"
+        TEXT query_text
+        JSON filters
+        INT result_count
+        DATETIME created_at
+        DATETIME updated_at
+        DATETIME deleted_at
+        BOOLEAN is_deleted
+    }
+
+    USERS ||--o| RECRUITERS : "has one recruiter profile"
+    USERS ||--o| CANDIDATES : "has one candidate profile"
+    USERS ||--o{ SEARCH_HISTORY : "issues"
+
+    CANDIDATES ||--o{ RESUMES : "uploads"
+    CANDIDATES ||--o{ CANDIDATE_SKILLS : "has"
+    CANDIDATES ||--o{ EMBEDDINGS : "has"
+    CANDIDATES ||--o{ RANKING_RESULTS : "receives"
+
+    RECRUITERS ||--o{ JOBS : "creates"
+
+    JOBS ||--o{ JOB_SKILLS : "requires"
+    JOBS ||--o{ EMBEDDINGS : "has"
+    JOBS ||--o{ RANKING_RESULTS : "scores"
+
+    SKILLS ||--o{ CANDIDATE_SKILLS : "appears in"
+    SKILLS ||--o{ JOB_SKILLS : "appears in"
